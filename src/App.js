@@ -3,7 +3,7 @@ import './App.css';
 import DistrictList from './DistrictList'
 import DistrictRepository from './helper'
 import kinderData from './data/kindergartners_in_full_day_program.js';
-import Search from './Search'
+import Search from './Search';
 
 
 
@@ -27,21 +27,29 @@ class App extends Component {
 
   addToCompare = (eventLocation) => {
     const foundCard = this.state.districts.findByName(eventLocation);
-    if (this.state.cardsToCompare.length > 1) {
-      this.compareAddedDistricts();
+    if(this.state.cardsToCompare.includes(foundCard)) {
+      let filterdCards = this.state.cardsToCompare.filter(card => card.location !== foundCard.location)
+      this.setState({
+        cardsToCompare: filterdCards,
+        comparedObject: {}
+
+      })
       return
     }
-    if(this.state.cardsToCompare.includes(foundCard) && this.state.cardsToCompare.length >= 1) {
-      return
+    if(this.state.cardsToCompare.length >= 2 || this.state.cardsToCompare.includes(eventLocation)) {
+      return;
     }
+    if (this.state.cardsToCompare.length <= 1) {
+      this.compareAddedDistricts(eventLocation);
+    } 
     this.setState({
       cardsToCompare: [...this.state.cardsToCompare, foundCard]
     })
   }
   
-  compareAddedDistricts = () => {
+  compareAddedDistricts = (eventLocation) => {
     if (this.state.cardsToCompare.length >= 1) {
-      const comparedObject = this.state.districts.compareDistrictAverages(this.state.cardsToCompare[0].location, this.state.cardsToCompare[1].location)
+      const comparedObject = this.state.districts.compareDistrictAverages(this.state.cardsToCompare[0].location, eventLocation)
       this.setState({
         comparedObject: comparedObject
       })
@@ -51,7 +59,10 @@ class App extends Component {
   render() {
     return (
       <React.Fragment> 
-        <Search searchDistricts={ this.searchDistricts } /> 
+        <header>
+          HEADCOUNT 2.0
+          <Search searchDistricts={ this.searchDistricts } /> 
+        </header>
         <DistrictList addToCompare={this.addToCompare} cardsToCompare={this.state.cardsToCompare} districts={this.state.districts.stats} searchedDistrict={this.state.searchedDistrict} comparedObject={this.state.comparedObject}/>
       </React.Fragment>
     );
